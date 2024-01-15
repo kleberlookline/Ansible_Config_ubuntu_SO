@@ -1,0 +1,31 @@
+Para configurar a relacao de confiaca via SSH: 
+git config --global user.name "Kleber Oliveira"
+git config --global user.email "kleber.lookline@gmail.com"
+
+ls -al ~/.ssh
+ssh-keygen -t rsa -b 4096 -C "kleber.lookline@gmail.com"
+cat /root/.ssh/id_rsa.pub
+
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa
+
+cat ~/.ssh/id_rsa.pub
+ssh -T git@github.com
+
+===============
+===============
+
+git clone git@github.com:kleberlookline/Ansible_Config_ubuntu_SO.git
+
+ls -lt Ansible_Config_ubuntu_SO/.git/
+
+cp config-so-ubuntu.sh install-ansible-config-so-ubuntu.sh Ansible_Config_ubuntu_SO/
+cd Ansible_Config_ubuntu_SO/
+
+git add .
+git commit -m "Commit inicial com playbook e scripts do Ansible"
+git push -u origin master
+
+git status
+git log
+git log origin/master
