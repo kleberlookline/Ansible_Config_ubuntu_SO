@@ -29,3 +29,5 @@ git push -u origin master
 git status
 git log
 git log origin/master
+
+git add . ; git commit -m "Instalacao do ELK versao 8.11 Final" ; git push -u origin master ; git status ; git log ; git log origin/master
