@@ -40,3 +40,7 @@ Executar: config-so-ubuntu-01.sh
 Executar: config-so-ubuntu-03-ansible.sh							
 Executra: ansible-playbook -i inventory.ini playbook_elk_install-04-Final.yml			
 
+===============
+===============
+
+service elasticsearch start ; service logstash start ; service kibana start
