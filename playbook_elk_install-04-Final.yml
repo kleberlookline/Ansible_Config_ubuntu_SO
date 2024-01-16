@@ -18,15 +18,24 @@
         - gnupg
       when: "'apt-transport-https' not in ansible_facts.packages | default([])"
 
-    - name: Download Elastic GPG key
+    - name: Download and import Elastic GPG key
       get_url:
         url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
         dest: /tmp/GPG-KEY-elasticsearch
+      become: yes
       when: "'elasticsearch' not in ansible_facts.packages | default([])"
+
+    - name: Create GPG directory
+      file:
+        path: /root/.gnupg
+        state: directory
+      become: yes
+      when: "'apt-transport-https' not in ansible_facts.packages | default([])"
 
     - name: Import Elastic GPG key
       shell: gpg --quiet --no-options --no-default-keyring --secret-keyring /usr/share/keyrings/elasticsearch-keyring.gpg --keyring /usr/share/keyrings/elasticsearch-keyring.gpg --import /tmp/GPG-KEY-elasticsearch
-      when: "'elasticsearch' not in ansible_facts.packages | default([])"
+      become: yes
+      when: "'apt-transport-https' not in ansible_facts.packages | default([])"
 
     - name: Install apt-transport-https
       apt:
@@ -34,10 +43,24 @@
         state: present
       when: "'apt-transport-https' not in ansible_facts.packages | default([])"
 
+    - name: Ensure /etc/apt/sources.list.d/ directory exists
+      file:
+        path: /etc/apt/sources.list.d/
+        state: directory
+      become: yes
+
     - name: Add Elastic APT repository
-      lineinfile:
-        dest: /etc/apt/sources.list.d/elastic-8.x.list
-        line: "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main"
+      block:
+        - name: Verificar se o arquivo do repositório existe
+          stat:
+            path: /etc/apt/sources.list.d/elastic-8.x.list
+          register: repo_file_result
+
+        - name: Criar arquivo do repositório
+          copy:
+            content: "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main"
+            dest: /etc/apt/sources.list.d/elastic-8.x.list
+          when: repo_file_result.stat is not defined or not repo_file_result.stat.exists
       when: "'/etc/apt/sources.list.d/elastic-8.x.list' not in (ansible_facts.files | default([]) | map(attribute='path'))"
 
     - name: Update apt package cache
@@ -47,12 +70,12 @@
 
     - name: Install Elasticsearch, Kibana, and Logstash
       apt:
-        name: "{{ item.name }}"
+        name: "{{ item }}"
         state: present
       loop:
-        - { name: elasticsearch }
-        - { name: kibana }
-        - { name: logstash }
+        - elasticsearch
+        - kibana
+        - logstash
       when: "'logstash' not in ansible_facts.packages | default([])"
 
     - name: Enable and start Elasticsearch service on boot (systemd)
