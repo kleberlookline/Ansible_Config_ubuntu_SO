@@ -1,0 +1,78 @@
+---
+- name: Install and Configure ELK Stack
+  hosts: localhost
+  gather_facts: yes
+  become: true
+
+  tasks:
+    - name: Install apt package requirements
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - gpg-agent
+        - curl
+        - procps
+        - net-tools
+        - gnupg
+      when: "'apt-transport-https' not in ansible_facts.packages | default([])"
+
+    - name: Download Elastic GPG key
+      get_url:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        dest: /tmp/GPG-KEY-elasticsearch
+      when: "'elasticsearch' not in ansible_facts.packages | default([])"
+
+    - name: Import Elastic GPG key
+      shell: gpg --quiet --no-options --no-default-keyring --secret-keyring /usr/share/keyrings/elasticsearch-keyring.gpg --keyring /usr/share/keyrings/elasticsearch-keyring.gpg --import /tmp/GPG-KEY-elasticsearch
+      when: "'elasticsearch' not in ansible_facts.packages | default([])"
+
+    - name: Install apt-transport-https
+      apt:
+        name: apt-transport-https
+        state: present
+      when: "'apt-transport-https' not in ansible_facts.packages | default([])"
+
+    - name: Add Elastic APT repository
+      lineinfile:
+        dest: /etc/apt/sources.list.d/elastic-8.x.list
+        line: "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main"
+      when: "'/etc/apt/sources.list.d/elastic-8.x.list' not in (ansible_facts.files | default([]) | map(attribute='path'))"
+
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+      when: "'apt-transport-https' in ansible_facts.packages | default([])"
+
+    - name: Install Elasticsearch, Kibana, and Logstash
+      apt:
+        name: "{{ item.name }}"
+        state: present
+      loop:
+        - { name: elasticsearch }
+        - { name: kibana }
+        - { name: logstash }
+      when: "'logstash' not in ansible_facts.packages | default([])"
+
+    - name: Enable and start Elasticsearch service on boot (systemd)
+      systemd:
+        name: elasticsearch
+        enabled: yes
+        state: started
+      when: "'elasticsearch' in ansible_facts.packages | default([])"
+
+    - name: Enable and start Kibana service on boot (systemd)
+      systemd:
+        name: kibana
+        enabled: yes
+        state: started
+      when: "'kibana' in ansible_facts.packages | default([])"
+
+    - name: Enable and start Logstash service on boot (systemd)
+      systemd:
+        name: logstash
+        enabled: yes
+        state: started
+      when: "'logstash' in ansible_facts.packages | default([])"
+
