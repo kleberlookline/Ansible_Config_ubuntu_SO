@@ -35,12 +35,77 @@ git add . ; git commit -m "Instalacao do ELK versao 8.11 Final" ; git push -u or
 ===============
 ===============
 
-Executar: git clone git clone git@github.com:kleberlookline/Ansible_Config_ubuntu_SO.git	
-Executar: config-so-ubuntu-01.sh								
-Executar: config-so-ubuntu-03-ansible.sh							
-Executra: ansible-playbook -i inventory.ini playbook_elk_install-04-Final.yml			
-
-===============
-===============
-
 service elasticsearch start ; service logstash start ; service kibana start
+service elasticsearch restart ; service logstash restart ; service kibana restart
+
+===============
+===============
+
+Executar: 
+git clone https://github.com/kleberlookline/Ansible_Config_ubuntu_SO.git
+
+Executar: 
+config-so-ubuntu-01.sh								
+
+Executar: 
+config-so-ubuntu-03-ansible.sh							
+
+Executar: 
+ansible-playbook -i inventory.ini playbook_elk_install-04-Final.yml da erro e precisa executar 2x
+
+=====================================================================================
+
+fazer backup dos arquivos
+cp /etc/elasticsearch/elasticsearch.yml 	/etc/elasticsearch/elasticsearch.yml.old
+cp /etc/kibana/kibana.yml 			/etc/kibana/kibana.yml.old
+
+--
+
+Deixar os arquivos vazios sem linhas e incluir apenas essas linhas:
+/etc/elasticsearch/elasticsearch.yml
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+network.host: 0.0.0.0
+http.port: 9200
+xpack.security.enabled: false
+xpack.security.enrollment.enabled: false
+xpack.security.http.ssl:
+  enabled: false
+  # keystore.path: certs/http.p12
+xpack.security.transport.ssl:
+  enabled: false
+  # verification_mode: certificate
+  # keystore.path: certs/transport.p12
+  # truststore.path: certs/transport.p12
+cluster.initial_master_nodes: ["geral-ubuntu-02"]
+http.host: 0.0.0.0
+
+-
+
+/etc/kibana/kibana.yml
+server.port: 5601
+server.host: "0.0.0.0"
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "pass"
+xpack.security.enabled: false
+logging:
+  appenders:
+    file:
+      type: file
+      fileName: /var/log/kibana/kibana.log
+      layout:
+        type: json
+  root:
+    appenders:
+      - default
+      - file
+pid.file: /run/kibana/kibana.pid
+
+=====================================================================================
+
+http://192.168.1.19:5601/
+
+Como funciona a pilha ELK?
+O Logstash ingere, transforma e envia os dados ao destino correto.
+O Elasticsearch indexa, analisa e pesquisa os dados ingeridos.
+O Kibana exibe os resultados da análise.
