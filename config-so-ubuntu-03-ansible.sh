@@ -85,6 +85,7 @@ cat <<EOL > playbook.yml
           - zip
           - unzip
           - jq
+          - awscli
         state: latest
         update_cache: true
 
