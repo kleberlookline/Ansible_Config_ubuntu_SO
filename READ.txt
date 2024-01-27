@@ -15,8 +15,6 @@ ssh -T git@github.com
 ===============
 ===============
 
-git clone git@github.com:kleberlookline/Ansible_Config_ubuntu_SO.git
-
 ls -lt Ansible_Config_ubuntu_SO/.git/
 
 cp config-so-ubuntu.sh install-ansible-config-so-ubuntu.sh Ansible_Config_ubuntu_SO/
@@ -41,7 +39,7 @@ service elasticsearch restart ; service logstash restart ; service kibana restar
 ===============
 ===============
 
-Executar: 
+Executar: <<<========
 git clone https://github.com/kleberlookline/Ansible_Config_ubuntu_SO.git
 
 Executar: 
