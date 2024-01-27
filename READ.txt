@@ -14,6 +14,9 @@ ssh -T git@github.com
 
 ===============
 ===============
+Para instalar o ELK segue o arquivo: playbook_elk_install-04-Final.yml
+===============
+===============
 
 ls -lt Ansible_Config_ubuntu_SO/.git/
 
